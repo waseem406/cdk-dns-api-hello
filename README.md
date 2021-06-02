@@ -1,12 +1,13 @@
-# Welcome to your CDK JavaScript project!
+# Sample AWS Serverless Project built with AWS CDK
 
-This is a blank project for JavaScript development with CDK.
+## Usage
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app. The build step is not required when using JavaScript.
+Create a new file in the root dir called .env and populate it with the contents of sample env.
 
-## Useful commands
+```bash
 
- * `npm run test`         perform the jest unit tests
- * `cdk deploy`           deploy this stack to your default AWS account/region
- * `cdk diff`             compare deployed stack with current state
- * `cdk synth`            emits the synthesized CloudFormation template
+npm i
+cdk bootstrap
+cdk deploy
+
+```
