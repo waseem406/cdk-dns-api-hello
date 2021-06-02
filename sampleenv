@@ -2,11 +2,13 @@
 DOMAIN_NAME=
 CREATE_ROUTE53_HOSTED_ZONE=false
 
-# Subdomain to be used for connecting to API Gateway and acm certificate is created with this name
+# Subdomain to be used for connecting to API Gateway 
+# and acm certificate is created with this name
+# default = api
 SUB_DOMAIN=
 
 # Name for API Gateway stage (default: prod)
 APIG_STAGE_NAME=
 
-# Lambda message output string
+# Lambda message output string default = 'Hello World!'
 MESSAGE_STRING=
