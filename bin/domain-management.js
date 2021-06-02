@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const cdk = require('@aws-cdk/core');
-const { DomainManagementStack } = require('../lib/domain-management-stack');
+const { DomainManagementStack } = require('../lib/main');
 
 const app = new cdk.App();
 new DomainManagementStack(app, 'DomainManagementStack', {

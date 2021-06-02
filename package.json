@@ -15,6 +15,12 @@
     "jest": "^26.4.2"
   },
   "dependencies": {
+    "@aws-cdk/aws-apigateway": "^1.106.1",
+    "@aws-cdk/aws-certificatemanager": "^1.106.1",
+    "@aws-cdk/aws-lambda": "^1.106.1",
+    "@aws-cdk/aws-lambda-nodejs": "^1.106.1",
+    "@aws-cdk/aws-route53": "^1.106.1",
+    "@aws-cdk/aws-route53-targets": "^1.106.1",
     "@aws-cdk/core": "1.106.1"
   }
 }
