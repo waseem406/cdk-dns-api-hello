@@ -1,4 +1,12 @@
-APIG_STAGE_NAME=
-SUB_DOMAIN=
+# Domain name to be used (hosted zone with this name should exist in ac/region if create is false)
 DOMAIN_NAME=
+CREATE_ROUTE53_HOSTED_ZONE=false
+
+# Subdomain to be used for connecting to API Gateway and acm certificate is created with this name
+SUB_DOMAIN=
+
+# Name for API Gateway stage (default: prod)
+APIG_STAGE_NAME=
+
+# Lambda message output string
 MESSAGE_STRING=
