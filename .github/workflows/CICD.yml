@@ -18,8 +18,7 @@ jobs:
   Build:
     runs-on: ubuntu-latest
     environment: 
-      name: dev
-      url: 'http://apigw.iharshit.site'
+      name: dev # If there are build parammeters then use this. (this is different from CDK parameters, they come later.)
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
