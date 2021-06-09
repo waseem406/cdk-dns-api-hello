@@ -37,9 +37,6 @@ jobs:
             ${{ runner.OS }}-
       - name: cache status
         run: echo ${{ steps.node_cache.outputs.cache-hit }}
-      - name: cache status again
-        if: steps.node_cache.outputs.cache-hit != 'true'
-        run: echo ${{ steps.node_cache.outputs.cache-hit }}
       - name: Install dependencies of not cached
         if: steps.node_cache.outputs.cache-hit != 'true'
         run: npm ci
@@ -67,7 +64,7 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - name: Install dependencies of not cached
-        if: steps.node_cache.outputs.cache-hit
+        if: steps.node_cache.outputs.cache-hit != 'true'
         run: npm ci
  
       - name: CDK Synth
@@ -109,7 +106,7 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - name: Install dependencies of not cached
-        if: steps.node_cache.outputs.cache-hit
+        if: steps.node_cache.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: CDK Deploy Dev
@@ -152,7 +149,7 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - name: Install dependencies of not cached
-        if: steps.node_cache.outputs.cache-hit
+        if: steps.node_cache.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: CDK Deploy to Stage
@@ -193,7 +190,7 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - name: Install dependencies of not cached
-        if: steps.node_cache.outputs.cache-hit
+        if: steps.node_cache.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: CDK Deploy Prod
