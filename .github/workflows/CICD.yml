@@ -45,7 +45,7 @@ jobs:
         uses: youyo/aws-cdk-github-actions@v2
         with:
           cdk_subcommand: 'synth'
-          cdk_args: '--require-approval never'
+          cdk_args: '--require-approval never --app'
           cdk_version: '1.16.2'
           working_dir: 'src'
         env:
