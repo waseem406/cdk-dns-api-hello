@@ -25,7 +25,19 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
+      - name: Cache node modules
+        id: node_cache
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-build-${{ env.cache-name }}-
+            ${{ runner.OS }}-build-
+            ${{ runner.OS }}-
+      - name: Install dependencies of not cached
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: yarn install
       - run: npm run build --if-present
 
   Validate_Stack:
@@ -39,8 +51,20 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
-        name: Install CDK dependencies
+      - name: Cache node modules
+        id: node_cache
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-build-${{ env.cache-name }}-
+            ${{ runner.OS }}-build-
+            ${{ runner.OS }}-
+      - name: Install dependencies of not cached
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: yarn install
+ 
       - name: CDK Synth
         uses: scottbrenner/aws-cdk-action@master
         with:
@@ -69,8 +93,20 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
-        name: Install CDK dependencies
+      - name: Cache node modules
+        id: node_cache
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-build-${{ env.cache-name }}-
+            ${{ runner.OS }}-build-
+            ${{ runner.OS }}-
+      - name: Install dependencies of not cached
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: yarn install
+
       - name: CDK Deploy Dev
         uses: scottbrenner/aws-cdk-action@master
         with:
@@ -100,8 +136,19 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
-        name: Install CDK dependencies
+      - name: Cache node modules
+        id: node_cache
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-build-${{ env.cache-name }}-
+            ${{ runner.OS }}-build-
+            ${{ runner.OS }}-
+      - name: Install dependencies of not cached
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: yarn install
 
       - name: CDK Deploy to Stage
         uses: scottbrenner/aws-cdk-action@master
@@ -126,13 +173,23 @@ jobs:
       url: 'http://www.myapp.com'
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
-        name: Install CDK dependencies
+      - name: Cache node modules
+        id: node_cache
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-build-${{ env.cache-name }}-
+            ${{ runner.OS }}-build-
+            ${{ runner.OS }}-
+      - name: Install dependencies of not cached
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: yarn install
 
       - name: CDK Deploy Prod
         uses: scottbrenner/aws-cdk-action@master
