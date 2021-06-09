@@ -35,6 +35,8 @@ jobs:
             ${{ runner.OS }}-build-${{ env.cache-name }}-
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
+      - name: cache status
+        run: echo ${{ steps.node_cache.outputs.cache-hit }}
       - name: Install dependencies of not cached
         if: steps.node_cache.outputs.cache-hit
         run: npm ci
