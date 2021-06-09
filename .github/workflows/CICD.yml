@@ -33,6 +33,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+        name: Install CDK dependencies
       - name: CDK Synth
         uses: scottbrenner/aws-cdk-action@master
         with:
@@ -57,7 +64,13 @@ jobs:
       url: 'http://apigw.iharshit.site'
     steps:
       - uses: actions/checkout@v2
-      - name: CDK Synth
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+        name: Install CDK dependencies
+      - name: CDK Deploy Dev
         uses: scottbrenner/aws-cdk-action@master
         with:
           args: diff # deploy to Dev
@@ -81,6 +94,14 @@ jobs:
       url: 'http://apigw.iharshit.site'
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+        name: Install CDK dependencies
+
       - name: CDK Deploy to Stage
         uses: scottbrenner/aws-cdk-action@master
         with:
@@ -104,6 +125,14 @@ jobs:
       url: 'http://www.myapp.com'
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+        name: Install CDK dependencies
+        
       - name: CDK Deploy Prod
         uses: scottbrenner/aws-cdk-action@master
         with:

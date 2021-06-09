@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// require('dotenv').config()
+require('dotenv').config()
 const cdk = require('@aws-cdk/core');
 const { DomainManagementStack } = require('../lib/main');
 
