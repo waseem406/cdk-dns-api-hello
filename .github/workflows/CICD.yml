@@ -15,11 +15,11 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  aws_cdk:
+  Build:
     runs-on: ubuntu-latest
     environment: 
       name: dev
-      url: apigw.iharshit.site
+      url: 'http://apigw.iharshit.site'
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
@@ -28,7 +28,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
       - run: npm run build --if-present
-      
+
+  Validate Cfn Stack:
+    runs-on: ubuntu-latest
+    steps:
       - name: CDK Synth
         uses: scottbrenner/aws-cdk-action@master
         with:
@@ -42,11 +45,20 @@ jobs:
           DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
           MESSAGE_STRING: ${{ secrets.MESSAGE_STRING }}
           CREATE_ROUTE53_HOSTED_ZONE: ${{ secrets.CREATE_ROUTE53_HOSTED_ZONE }}
-      
-      - name: CDK Deploy
+
+  DeployDev:
+    name: Deploy to Dev 
+    if: github.event_name == 'pull_request'
+    needs: [Build, Validate Cfn Stack]
+    runs-on: ubuntu-latest
+    environment: 
+      name: Development
+      url: 'http://apigw.iharshit.site'
+    steps:
+      - name: CDK Synth
         uses: scottbrenner/aws-cdk-action@master
         with:
-          args: diff
+          args: diff # deploy to Dev
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -57,4 +69,48 @@ jobs:
           MESSAGE_STRING: ${{ secrets.MESSAGE_STRING }}
           CREATE_ROUTE53_HOSTED_ZONE: ${{ secrets.CREATE_ROUTE53_HOSTED_ZONE }}
 
+  DeployStaging:
+    name: Deploy to Staging 
+    if: github.event.ref == 'refs/heads/main'
+    needs: [Build, Validate Cfn Stack]
+    runs-on: ubuntu-latest
+    environment: 
+      name: Staging
+      url: 'http://apigw.iharshit.site'
+    steps:
+      - name: CDK Deploy to Stage
+        uses: scottbrenner/aws-cdk-action@master
+        with:
+          args: diff # deploy to stage
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          APIG_STAGE_NAME: ${{ secrets.APIG_STAGE_NAME }}
+          SUB_DOMAIN: ${{ secrets.SUB_DOMAIN }}
+          DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+          MESSAGE_STRING: ${{ secrets.MESSAGE_STRING }}
+          CREATE_ROUTE53_HOSTED_ZONE: ${{ secrets.CREATE_ROUTE53_HOSTED_ZONE }}
+
+  DeployProd:
+    name: Deploy to Production 
+    needs: [DeployStaging]
+    runs-on: ubuntu-latest
+    environment: 
+      name: Production
+      url: 'http://www.myapp.com'
+    steps:
+      - name: CDK Deploy Prod
+        uses: scottbrenner/aws-cdk-action@master
+        with:
+          args: diff # deploy to prod
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          APIG_STAGE_NAME: ${{ secrets.APIG_STAGE_NAME }}
+          SUB_DOMAIN: ${{ secrets.SUB_DOMAIN }}
+          DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+          MESSAGE_STRING: ${{ secrets.MESSAGE_STRING }}
+          CREATE_ROUTE53_HOSTED_ZONE: ${{ secrets.CREATE_ROUTE53_HOSTED_ZONE }}
       
