@@ -26,16 +26,30 @@ jobs:
       - run: npm ci
       - run: npm run build --if-present
       # Configure AWS credentials
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ap-south-1
       - name: CDK Synth
         uses: scottbrenner/aws-cdk-action@master
         with:
           args: synth
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          APIG_STAGE_NAME: dev
+          SUB_DOMAIN: dev
+          DOMAIN_NAME: iharshit.site
+          MESSAGE_STRING: hello world!
+          CREATE_ROUTE53_HOSTED_ZONE: false
+      
+      - name: CDK Deploy
+        uses: scottbrenner/aws-cdk-action@master
+        with:
+          args: diff
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
