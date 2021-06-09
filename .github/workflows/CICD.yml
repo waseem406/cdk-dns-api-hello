@@ -18,16 +18,13 @@ jobs:
   aws_cdk:
     runs-on: ubuntu-latest
     steps:
-      - name: Hellp
-        run: |
-          pwd
-          ls
-#       - name: CDK Synth
-#         uses: scottbrenner/aws-cdk-action@master
-#         with:
-#           args: synth
-#         env:
-#           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+      - uses: actions/checkout@v2
+      - name: CDK Synth
+        uses: scottbrenner/aws-cdk-action@master
+        with:
+          args: synth
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       
