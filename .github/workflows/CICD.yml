@@ -36,8 +36,8 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - name: Install dependencies of not cached
-        if: steps.node-cache.outputs.cache-hit != 'true'
-        run: yarn install
+        if: steps.node_cache.outputs.cache-hit
+        run: npm ci
       - run: npm run build --if-present
 
   Validate_Stack:
@@ -62,8 +62,8 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - name: Install dependencies of not cached
-        if: steps.node-cache.outputs.cache-hit != 'true'
-        run: yarn install
+        if: steps.node_cache.outputs.cache-hit
+        run: npm ci
  
       - name: CDK Synth
         uses: scottbrenner/aws-cdk-action@master
@@ -104,8 +104,8 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - name: Install dependencies of not cached
-        if: steps.node-cache.outputs.cache-hit != 'true'
-        run: yarn install
+        if: steps.node_cache.outputs.cache-hit
+        run: npm ci
 
       - name: CDK Deploy Dev
         uses: scottbrenner/aws-cdk-action@master
@@ -147,8 +147,8 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - name: Install dependencies of not cached
-        if: steps.node-cache.outputs.cache-hit != 'true'
-        run: yarn install
+        if: steps.node_cache.outputs.cache-hit
+        run: npm ci
 
       - name: CDK Deploy to Stage
         uses: scottbrenner/aws-cdk-action@master
@@ -188,8 +188,8 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - name: Install dependencies of not cached
-        if: steps.node-cache.outputs.cache-hit != 'true'
-        run: yarn install
+        if: steps.node_cache.outputs.cache-hit
+        run: npm ci
 
       - name: CDK Deploy Prod
         uses: scottbrenner/aws-cdk-action@master
