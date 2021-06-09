@@ -18,7 +18,8 @@ jobs:
   aws_cdk:
     runs-on: ubuntu-latest
     steps:
-
+      - name: Hellp
+        run: "ls"
       - name: CDK Synth
         uses: scottbrenner/aws-cdk-action@master
         with:
