@@ -33,6 +33,7 @@ jobs:
     name: Validate Cfn Stack
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: CDK Synth
         uses: scottbrenner/aws-cdk-action@master
         with:
@@ -56,6 +57,7 @@ jobs:
       name: Development
       url: 'http://apigw.iharshit.site'
     steps:
+      - uses: actions/checkout@v2
       - name: CDK Synth
         uses: scottbrenner/aws-cdk-action@master
         with:
@@ -79,6 +81,7 @@ jobs:
       name: Staging
       url: 'http://apigw.iharshit.site'
     steps:
+      - uses: actions/checkout@v2
       - name: CDK Deploy to Stage
         uses: scottbrenner/aws-cdk-action@master
         with:
@@ -101,6 +104,7 @@ jobs:
       name: Production
       url: 'http://www.myapp.com'
     steps:
+      - uses: actions/checkout@v2
       - name: CDK Deploy Prod
         uses: scottbrenner/aws-cdk-action@master
         with:
