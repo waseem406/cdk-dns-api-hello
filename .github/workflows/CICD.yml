@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Hellp
         run: |
-          echo pwd
+          pwd
 #       - name: CDK Synth
 #         uses: scottbrenner/aws-cdk-action@master
 #         with:
