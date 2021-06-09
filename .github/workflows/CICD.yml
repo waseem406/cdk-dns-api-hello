@@ -21,6 +21,7 @@ jobs:
       - name: Hellp
         run: |
           pwd
+          ls
 #       - name: CDK Synth
 #         uses: scottbrenner/aws-cdk-action@master
 #         with:
