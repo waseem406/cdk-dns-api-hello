@@ -32,7 +32,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: node_modules
-          key: ${{ runner.OS }}-ui-build-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.OS }}-ui-build-${{ hashFiles('**/myreactapp/package-lock.json') }}
           restore-keys: |
             ${{ runner.OS }}-ui-build-${{ env.cache-name }}-
             ${{ runner.OS }}-ui-build-
