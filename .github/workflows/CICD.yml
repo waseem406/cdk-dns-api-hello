@@ -81,9 +81,7 @@ jobs:
         run: npm ci;
 
       - name: CDK Synth
-        uses: scottbrenner/aws-cdk-action@master
-        with:
-          args: synth
+        run: npx cdk synth
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -130,9 +128,7 @@ jobs:
         if: steps.node_cache_cdk.outputs.cache-hit != 'true'
         run: npm ci;
       - name: CDK Deploy Dev
-        uses: scottbrenner/aws-cdk-action@master
-        with:
-          args: diff # deploy to Dev
+        run: npx cdk diff # deploy to Dev
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -195,9 +191,7 @@ jobs:
         run: npm ci;
 
       - name: CDK Deploy to Stage
-        uses: scottbrenner/aws-cdk-action@master
-        with:
-          args: diff # deploy to stage
+        run: npx cdk diff
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -259,9 +253,7 @@ jobs:
         run: npm ci;
 
       - name: CDK Deploy Prod
-        uses: scottbrenner/aws-cdk-action@master
-        with:
-          args: diff # deploy to prod
+        run: npx cdk diff
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
