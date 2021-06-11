@@ -39,12 +39,12 @@ jobs:
         run: echo ${{ steps.node_cache_ui.outputs.cache-hit }}
       - name: Install dependencies if UI cache not found
         if: steps.node_cache_ui.outputs.cache-hit != 'true'
-        run: cd reactapp; npm ci; cd ..
-      - run: cd reactapp; SKIP_PREFLIGHT_CHECK=true npm run build --if-present; cd ..
+        run: cd myreactapp; npm ci; cd ..
+      - run: cd myreactapp; SKIP_PREFLIGHT_CHECK=true npm run build --if-present; cd ..
       - uses: actions/upload-artifact@v2
         with:
           name: UI_build_raw
-          path: reactapp/build/ # or path/to/artifact
+          path: myreactapp/build/ # or path/to/artifact
 
   Validate_Stack:
     name: Validate Cfn Stack
@@ -100,7 +100,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: UI_build_raw
-          path: reactapp/build
+          path: myreactapp/build
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -142,12 +142,12 @@ jobs:
       # Deploy push to AWS S3
       - name: Hydrate UI with Parameters
         run: |
-          cd reactapp/build;
+          cd myreactapp/build;
           find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_NAME_PH/Harshit/g' {} +
           find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_STAGE_PH/dev/g' {} +
           cd ../../
       - name: AWS Deploy to dev
-        run: aws s3 sync reactapp/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
+        run: aws s3 sync myreactapp/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
   DeployStaging:
     name: Deploy to Staging 
@@ -162,7 +162,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: UI_build_raw
-          path: reactapp/build
+          path: myreactapp/build
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -205,12 +205,12 @@ jobs:
       # Deploy push to AWS S3
       - name: Hydrate UI with Parameters
         run: |
-          cd reactapp/build;
+          cd myreactapp/build;
           find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_NAME_PH/harshit/g' {} +
           find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_STAGE_PH/stage/g' {} +
           cd ../../
       - name: AWS Deploy to Stage
-        run: aws s3 sync reactapp/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
+        run: aws s3 sync myreactapp/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
   DeployProd:
     name: Deploy to Production 
@@ -224,7 +224,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: UI_build_raw
-          path: reactapp/build
+          path: myreactapp/build
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -267,10 +267,10 @@ jobs:
       # Deploy push to AWS S3
       - name: Hydrate UI with Parameters
         run: |
-          cd reactapp/build;
+          cd myreactapp/build;
           find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_NAME_PH/harshit/g' {} +
           find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_STAGE_PH/prod/g' {} +
           cd ../../
       - name: AWS Deploy to Prod
-        run: aws s3 sync reactapp/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
+        run: aws s3 sync myreactapp/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
       
