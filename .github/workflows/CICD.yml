@@ -25,22 +25,26 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        id: node_cache
-        uses: actions/cache@v1
+      - name: Cache UI node modules for UI
+        id: node_cache_ui
+        uses: actions/cache@v2
         with:
           path: node_modules
-          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.OS }}-ui-build-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.OS }}-build-${{ env.cache-name }}-
-            ${{ runner.OS }}-build-
-            ${{ runner.OS }}-
-      - name: cache status
-        run: echo ${{ steps.node_cache.outputs.cache-hit }}
-      - name: Install dependencies of not cached
-        if: steps.node_cache.outputs.cache-hit != 'true'
-        run: npm ci
-      - run: npm run build --if-present
+            ${{ runner.OS }}-ui-build-${{ env.cache-name }}-
+            ${{ runner.OS }}-ui-build-
+            ${{ runner.OS }}-ui-
+      - name: UI cache found?
+        run: echo ${{ steps.node_cache_ui.outputs.cache-hit }}
+      - name: Install dependencies if UI cache not found
+        if: steps.node_cache_ui.outputs.cache-hit != 'true'
+        run: cd reactapp; npm ci; cd ..
+      - run: cd reactapp; SKIP_PREFLIGHT_CHECK=true npm run build --if-present; cd ..
+      - uses: actions/upload-artifact@v2
+        with:
+          name: UI_build_raw
+          path: reactapp/build/ # or path/to/artifact
 
   Validate_Stack:
     name: Validate Cfn Stack
@@ -53,9 +57,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        id: node_cache
-        uses: actions/cache@v1
+      - name: Cache CDK node modules for Backend
+        id: node_cache_cdk
+        uses: actions/cache@v2
         with:
           path: node_modules
           key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
@@ -63,12 +67,16 @@ jobs:
             ${{ runner.OS }}-build-${{ env.cache-name }}-
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
-      - name: Install dependencies of not cached
-        if: steps.node_cache.outputs.cache-hit != 'true'
-        run: npm ci
- 
+      - name: CDK cache found?
+        run: echo ${{ steps.node_cache_cdk.outputs.cache-hit }}
+      - name: Install dependencies if CDK cache not found!
+        if: steps.node_cache_cdk.outputs.cache-hit != 'true'
+        run: npm ci;
+
       - name: CDK Synth
-        run: npx cdk synth
+        uses: scottbrenner/aws-cdk-action@master
+        with:
+          args: synth
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -86,16 +94,20 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: dev
-      url: 'http://apigw.iharshit.site'
+      url: 'http://build-with-sed-dev.s3-website.ap-south-1.amazonaws.com/'
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: UI_build_raw
+          path: reactapp/build
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        id: node_cache
-        uses: actions/cache@v1
+      - name: Cache CDK node modules for Backend
+        id: node_cache_cdk
+        uses: actions/cache@v2
         with:
           path: node_modules
           key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
@@ -103,15 +115,15 @@ jobs:
             ${{ runner.OS }}-build-${{ env.cache-name }}-
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
-      - name: Install dependencies of not cached
-        if: steps.node_cache.outputs.cache-hit != 'true'
-        run: npm ci
-
-      - name: CDK Deploy to Dev
-        run: |
-          # npx cdk bootstrap
-          npx cdk diff
-          # npx cdk deploy
+      - name: CDK cache found?
+        run: echo ${{ steps.node_cache_cdk.outputs.cache-hit }}
+      - name: Install dependencies if CDK cache not found!
+        if: steps.node_cache_cdk.outputs.cache-hit != 'true'
+        run: npm ci;
+      - name: CDK Deploy Dev
+        uses: scottbrenner/aws-cdk-action@master
+        with:
+          args: diff # deploy to Dev
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -121,6 +133,21 @@ jobs:
           DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
           MESSAGE_STRING: ${{ secrets.MESSAGE_STRING }}
           CREATE_ROUTE53_HOSTED_ZONE: ${{ secrets.CREATE_ROUTE53_HOSTED_ZONE }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+      # Deploy push to AWS S3
+      - name: Hydrate UI with Parameters
+        run: |
+          cd reactapp/build;
+          find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_NAME_PH/Harshit/g' {} +
+          find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_STAGE_PH/dev/g' {} +
+          cd ../../
+      - name: AWS Deploy to dev
+        run: aws s3 sync reactapp/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
   DeployStaging:
     name: Deploy to Staging 
@@ -128,18 +155,21 @@ jobs:
     needs: [Build, Validate_Stack]
     runs-on: ubuntu-latest
     environment: 
-      name: dev
-      url: 'http://apigw.iharshit.site'
+      name: stage
+      url: 'http://build-with-sed-stg.s3-website.ap-south-1.amazonaws.com/'
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: UI_build_raw
+          path: reactapp/build
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        id: node_cache
-        uses: actions/cache@v1
+      - name: Cache CDK node modules for Backend
+        id: node_cache_cdk
+        uses: actions/cache@v2
         with:
           path: node_modules
           key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
@@ -147,15 +177,16 @@ jobs:
             ${{ runner.OS }}-build-${{ env.cache-name }}-
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
-      - name: Install dependencies of not cached
-        if: steps.node_cache.outputs.cache-hit != 'true'
-        run: npm ci
+      - name: CDK cache found?
+        run: echo ${{ steps.node_cache_cdk.outputs.cache-hit }}
+      - name: Install dependencies if CDK cache not found!
+        if: steps.node_cache_cdk.outputs.cache-hit != 'true'
+        run: npm ci;
 
       - name: CDK Deploy to Stage
-        run: |
-          # npx cdk bootstrap
-          npx cdk diff
-          # npx cdk deploy
+        uses: scottbrenner/aws-cdk-action@master
+        with:
+          args: diff # deploy to stage
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -165,23 +196,42 @@ jobs:
           DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
           MESSAGE_STRING: ${{ secrets.MESSAGE_STRING }}
           CREATE_ROUTE53_HOSTED_ZONE: ${{ secrets.CREATE_ROUTE53_HOSTED_ZONE }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+      # Deploy push to AWS S3
+      - name: Hydrate UI with Parameters
+        run: |
+          cd reactapp/build;
+          find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_NAME_PH/harshit/g' {} +
+          find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_STAGE_PH/stage/g' {} +
+          cd ../../
+      - name: AWS Deploy to Stage
+        run: aws s3 sync reactapp/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
   DeployProd:
     name: Deploy to Production 
     needs: [DeployStaging]
     runs-on: ubuntu-latest
     environment: 
-      name: dev
-      url: 'http://www.myapp.com'
+      name: prod
+      url: 'http://build-with-sed-prod.s3-website.ap-south-1.amazonaws.com/'
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: UI_build_raw
+          path: reactapp/build
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        id: node_cache
-        uses: actions/cache@v1
+      - name: Cache CDK node modules for Backend
+        id: node_cache_cdk
+        uses: actions/cache@v2
         with:
           path: node_modules
           key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
@@ -189,15 +239,16 @@ jobs:
             ${{ runner.OS }}-build-${{ env.cache-name }}-
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
-      - name: Install dependencies of not cached
-        if: steps.node_cache.outputs.cache-hit != 'true'
-        run: npm ci
+      - name: CDK cache found?
+        run: echo ${{ steps.node_cache_cdk.outputs.cache-hit }}
+      - name: Install dependencies if CDK cache not found!
+        if: steps.node_cache_cdk.outputs.cache-hit != 'true'
+        run: npm ci;
 
       - name: CDK Deploy Prod
-        run: |
-          # npx cdk bootstrap
-          npx cdk diff
-          # npx cdk deploy
+        uses: scottbrenner/aws-cdk-action@master
+        with:
+          args: diff # deploy to prod
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -207,4 +258,19 @@ jobs:
           DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
           MESSAGE_STRING: ${{ secrets.MESSAGE_STRING }}
           CREATE_ROUTE53_HOSTED_ZONE: ${{ secrets.CREATE_ROUTE53_HOSTED_ZONE }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+      # Deploy push to AWS S3
+      - name: Hydrate UI with Parameters
+        run: |
+          cd reactapp/build;
+          find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_NAME_PH/harshit/g' {} +
+          find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_STAGE_PH/prod/g' {} +
+          cd ../../
+      - name: AWS Deploy to Prod
+        run: aws s3 sync reactapp/build s3://${{ secrets.S3_BUCKET_NAME }} --delete
       
