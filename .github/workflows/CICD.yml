@@ -41,6 +41,9 @@ jobs:
         if: steps.node_cache_ui.outputs.cache-hit != 'true'
         run: cd myreactapp; npm ci; cd ..
       - run: cd myreactapp; SKIP_PREFLIGHT_CHECK=true npm run build --if-present; cd ..
+        env:
+          REACT_APP_NAME_PH: BUILD_NAME_PH
+          REACT_APP_STAGE_PH: BUILD_STAGE_PH
       - uses: actions/upload-artifact@v2
         with:
           name: UI_build_raw
