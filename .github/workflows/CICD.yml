@@ -27,6 +27,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Cache UI node modules for UI
         id: node_cache_ui
+        env:
+          cache-name: node_cache_ui
         uses: actions/cache@v2
         with:
           path: node_modules
@@ -62,6 +64,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Cache CDK node modules for Backend
         id: node_cache_cdk
+        env:
+          cache-name: node_cache_cdk
         uses: actions/cache@v2
         with:
           path: node_modules
@@ -111,6 +115,8 @@ jobs:
       - name: Cache CDK node modules for Backend
         id: node_cache_cdk
         uses: actions/cache@v2
+        env:
+          cache-name: node_cache_cdk
         with:
           path: node_modules
           key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
@@ -172,6 +178,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Cache CDK node modules for Backend
         id: node_cache_cdk
+        env:
+          cache-name: node_cache_cdk
         uses: actions/cache@v2
         with:
           path: node_modules
@@ -234,6 +242,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Cache CDK node modules for Backend
         id: node_cache_cdk
+        env:
+          cache-name: node_cache_cdk
         uses: actions/cache@v2
         with:
           path: node_modules
