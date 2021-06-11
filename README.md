@@ -45,5 +45,12 @@ or
 find . -type f -exec grep -Iq . {} \; -exec sed -i 's/BUILD_STAGE_PH/<ANYTHING_HERE>/g' {} +
 ```
 
+#### Here are the website URLs
+
+- [Dev](http://build-with-sed-dev.s3-website.ap-south-1.amazonaws.com/)
+- [Stage](http://build-with-sed-stg.s3-website.ap-south-1.amazonaws.com/)
+- [Prod](http://build-with-sed-prod.s3-website.ap-south-1.amazonaws.com/)
+
 #### Warning
-Do not uncomment cdk deploy. Repo secrets have limited AWS access and missing deployment params. (For security reasons.)
+
+Do not uncomment `cdk deploy`. Repo secrets have read only AWS access. (For security reasons)
